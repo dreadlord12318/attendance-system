@@ -18,3 +18,5 @@ EXPOSE 80
 
 # 5. Start script
 CMD php artisan migrate --force && php artisan serve --host 0.0.0.0 --port 80
+
+RUN docker-php-ext-install pdo_pgsql pgsql mbstring exif pcntl bcmath gd
