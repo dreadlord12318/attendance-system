@@ -1,31 +1,39 @@
-# Step 1: Build the Vue assets using Node
-FROM node:20 as build-stage
+# Step 1: Use a PHP image that also has Node installed
+FROM php:8.2-fpm as build-stage
+
+# Install system dependencies and Node.js
+RUN apt-get update && apt-get install -y \
+    git libpng-dev libonig-dev libxml2-dev zip unzip curl
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs
+
 WORKDIR /app
 COPY . .
+
+# Install PHP dependencies first
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN composer install --no-dev
+
+# Now build the frontend (PHP is now available for Wayfinder!)
 RUN npm install
 RUN npm run build
 
-# Step 2: Set up the PHP environment
+# Step 2: Final Production Image
 FROM php:8.2-fpm
 WORKDIR /var/www
 
-# Install system dependencies
+# Install production dependencies
 RUN apt-get update && apt-get install -y \
-    git libpng-dev libonig-dev libxml2-dev zip unzip nginx
+    libpng-dev libonig-dev libxml2-dev zip unzip nginx
 
-# Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# Copy project files and the built assets from Node stage
+# Copy everything from build stage
 COPY --from=build-stage /app /var/www
 
-# Install Composer dependencies
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-RUN composer install --no-dev --optimize-autoloader
+# Fix permissions
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Setup Nginx and Permissions
-RUN chown -R www-data:www-data /var/www/storage /var/www/cache
 EXPOSE 80
 
-# Simple start script
+# Start script
 CMD php artisan migrate --force && php artisan serve --host 0.0.0.0 --port 80
