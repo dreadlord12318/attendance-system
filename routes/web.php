@@ -28,4 +28,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
 });
 
+// Temporary Registration Route (Remove in production)
+Route::get('/setup-admin', function () {
+    // Check if the user already exists to avoid duplicates
+    if (User::where('email', 'admin@diazcollege.edu')->exists()) {
+        return "Admin already exists!";
+    }
+
+    User::create([
+        'name' => 'Diaz Admin',
+        'email' => 'admin@diazcollege.edu',
+        'password' => Hash::make('admin'), 
+    ]);
+
+    return "Admin account created successfully!";
+});
+
 require __DIR__.'/settings.php';
