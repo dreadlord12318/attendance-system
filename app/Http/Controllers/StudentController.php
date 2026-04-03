@@ -48,10 +48,10 @@ class StudentController extends Controller
         ->latest()
         ->take(15)
         ->get();
-        
+
     return Inertia::render('Dashboard', [
-        'students'           => $students,
-        'attendance_history' => $history
+        'students' => Student::all(),
+        'attendance_history' => Attendance::with('student')->latest()->get()
     ]);
     }
 

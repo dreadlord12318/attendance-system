@@ -131,7 +131,7 @@ const submit = () => {
                                         <div class="text-xs text-gray-400 font-mono">{{ record.student.student_id }}</div>
                                     </td>
                                     <td class="px-6 py-4 text-right text-gray-600 font-mono text-sm">
-                                        {{ new Date(record.scanned_at).toLocaleString() }}
+                                        {{ new Date(record.created_at).toLocaleString() }}
                                     </td>
                                 </tr>
                                 <tr v-if="attendance_history.length === 0">
