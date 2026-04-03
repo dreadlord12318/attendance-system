@@ -1,39 +1,31 @@
-# Step 1: Use a PHP image that also has Node installed
-FROM php:8.2-fpm as build-stage
+FROM php:8.2-fpm
 
-# Install system dependencies and Node.js
+# 1. Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git libpng-dev libonig-dev libxml2-dev zip unzip curl
+    git curl libpng-dev libonig-dev libxml2-dev zip unzip nginx
+
+# 2. Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+# 3. Install Node.js (needed for Vite/Inertia build)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs
 
-WORKDIR /app
+# 4. Set working directory
+WORKDIR /var/www
 COPY . .
 
-# Install PHP dependencies first
+# 5. Install Composer & Dependencies
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-RUN composer install --no-dev
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
-# Now build the frontend (PHP is now available for Wayfinder!)
+# 6. Build Frontend
 RUN npm install
 RUN npm run build
 
-# Step 2: Final Production Image
-FROM php:8.2-fpm
-WORKDIR /var/www
-
-# Install production dependencies
-RUN apt-get update && apt-get install -y \
-    libpng-dev libonig-dev libxml2-dev zip unzip nginx
-
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
-
-# Copy everything from build stage
-COPY --from=build-stage /app /var/www
-
-# Fix permissions
+# 7. Permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 EXPOSE 80
 
-# Start script
+# 8. Start script (Migrates database and starts server)
 CMD php artisan migrate --force && php artisan serve --host 0.0.0.0 --port 80
