@@ -6,6 +6,8 @@ use App\Http\Controllers\AttendanceController;
 use Inertia\Inertia;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AuthenticatedSessionController;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 Route::get('/', function () {
     return Inertia::render('Scanner');
