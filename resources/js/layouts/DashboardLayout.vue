@@ -25,7 +25,7 @@ const user = computed(() => page.props.auth?.user);
                     <span class="text-sm font-medium">Students List</span>
                 </Link>
 
-                <Link href="/scanner" 
+                <Link href="/" 
                     class="flex items-center px-4 py-3 rounded-xl transition hover:bg-diaz-green"
                     :class="{ 'bg-diaz-green shadow-lg': $page.component === 'Scanner' }">
                     <span class="text-sm font-medium">QR Scanner</span>

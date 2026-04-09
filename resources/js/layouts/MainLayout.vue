@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+
+const page = usePage();
+
+// Check if a user exists in the shared auth prop
+const user = computed(() => page.props.auth?.user);
 </script>
 
 <template>
@@ -8,15 +14,30 @@ import { Link } from '@inertiajs/vue3';
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16 items-center">
                     <div class="flex items-center gap-3">
-                        <div class="h-10 w-10 bg-white rounded-full flex items-center justify-center text-diaz-green font-bold shadow-sm">
-                            DC
-                        </div>
-                        <span class="text-xl font-bold tracking-tight uppercase">Diaz College</span>
+                        <Link href="/" class="flex items-center gap-3">
+                            <div class="h-10 w-10 bg-white rounded-full flex items-center justify-center text-diaz-green font-bold shadow-sm">
+                                DC
+                            </div>
+                            <span class="text-xl font-bold tracking-tight uppercase">Diaz College</span>
+                        </Link>
                     </div>
                     
                     <div class="flex gap-6 items-center">
-                        <Link href="/" class="text-sm font-medium hover:text-green-200">Home</Link>
-                        <Link href="/login" class="bg-white text-diaz-green px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-gray-100 transition">
+                        <Link v-if="user" href="/dashboard" class="text-sm font-medium hover:text-green-200">Dashboard</Link>
+                        <Link v-else href="/" class="text-sm font-medium hover:text-green-200">Home</Link>
+
+                        <Link v-if="user" 
+                            href="/logout" 
+                            method="post" 
+                            as="button"
+                            class="bg-white text-diaz-green px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-gray-100 transition"
+                        >
+                            Log Out
+                        </Link>
+                        <Link v-else 
+                            href="/login" 
+                            class="bg-white text-diaz-green px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-gray-100 transition"
+                        >
                             Log In
                         </Link>
                     </div>
